@@ -1,41 +1,22 @@
-import React, { lazy, Suspense, useEffect } from 'react';
-import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import React, { Suspense } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 
-// Import synchrone de la page principale et des pages fréquemment utilisées
+// ✅ CORRECTION: Import synchrone de TOUTES les pages pour éviter les problèmes de navigation
 import HomePage from './pages/Home/Home';
 import UsersPage from './pages/Users/Users';
 import MonitoringPage from './pages/Monitoring/Monitoring';
+import SettingsPage from './pages/Settings/Settings';
+import RolesPage from './pages/Roles/Roles';
+import PermissionsPage from './pages/Permissions/Permissions';
+import NotificationsPage from './pages/Notifications/Notifications';
 
-// ✅ CORRECTION: Import des pages manquantes (lazy loading)
-const SettingsPage = lazy(() => import('./pages/Settings/Settings'));
-const PostesPage = lazy(() => import('./pages/Postes/Postes'));
-const RolesPage = lazy(() => import('./pages/Roles/Roles'));
-const PermissionsPage = lazy(() => import('./pages/Permissions/Permissions'));
-const Notifications = lazy(() => import('./pages/Notifications/Notifications'));
-
-// Préchargez les modules de manière progressive
-const preloadRoutes = () => {
-  const timeout = setTimeout(() => {
-    // Préchargement des routes moins utilisées
-    import('./pages/Settings/Settings');
-  }, 300);
-  
-  return () => clearTimeout(timeout);
-};
-
-// Composant de chargement invisible - aucun flash
+// Composant de chargement invisible - aucun flash  
 const InvisibleLoader = () => null;
 
 // Ce composant définit les routes internes au Dashboard
 const AppRoutes = () => {
-  const location = useLocation();
   const { hasPermission } = useAuth();
-  
-  // Préchargement des routes au montage initial
-  useEffect(() => {
-    return preloadRoutes();
-  }, []);
 
   return (
     <Suspense fallback={<InvisibleLoader />}>
@@ -77,7 +58,7 @@ const AppRoutes = () => {
         } />
         
         {/* Page de notifications accessible à tous les utilisateurs connectés */}
-        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
         
         {/* Paramètres - accessible à tous */}
         <Route path="/settings" element={<SettingsPage />} />

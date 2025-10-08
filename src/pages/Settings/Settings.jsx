@@ -20,7 +20,7 @@ import NotificationSettings from '../../components/settings/NotificationSettings
 const Settings = () => {
   const { user } = useAuth();
   // ✅ i18n: Utilise getTranslation pour cohérence avec LanguageContext (supprime translations non exposé)
-  const { getTranslation, language, setLanguage, availableLanguages } = useLanguage();
+  const { getTranslation, currentLanguage, setLanguage, availableLanguages } = useLanguage();
   const { theme, setTheme, availableThemes } = useTheme();
   const [searchParams] = useSearchParams();
 
@@ -30,35 +30,34 @@ const Settings = () => {
     autoSave: true,
     sessionTimeout: 60,
     theme: theme?.mode || theme || 'dark',
-    language: language || 'en'
+    language: currentLanguage || 'fr'
   });
 
   // Synchroniser l'état local avec les contextes au montage et quand ils changent
   useEffect(() => {
-    const currentTheme = theme?.mode || theme || 'dark';
-    const currentLanguage = language || 'en';
+    const currentThemeValue = theme?.mode || theme || 'dark';
+    const currentLang = currentLanguage || 'fr';
     
-    console.log('🏁 [SETTINGS] Initialisation/Sync:', { currentTheme, currentLanguage });
+    console.log('🏁 [SETTINGS] Initialisation/Sync:', { currentThemeValue, currentLang });
     
     setSettings(prev => ({
       ...prev,
-      theme: currentTheme,
-      language: currentLanguage
+      theme: currentThemeValue,
+      language: currentLang
     }));
-  }, [theme, language]); // Réagir aux changements de contexte
+  }, [theme, currentLanguage]); // Réagir aux changements de contexte
 
-  // ✅ DIAGNOSTIC pour identifier la structure du thème
   // ✅ DIAGNOSTIC pour identifier la structure du thème
   useEffect(() => {
     console.log('🔍 [SETTINGS] Diagnostic thème:', {
       theme,
       themeMode: theme?.mode,
       themeType: typeof theme,
-      language,
+      currentLanguage,
       availableThemes,
       availableLanguages
     });
-  }, [theme, language, availableThemes, availableLanguages]);
+  }, [theme, currentLanguage, availableThemes, availableLanguages]);
 
   // Gérer l'onglet depuis les paramètres d'URL
   useEffect(() => {
@@ -291,7 +290,8 @@ const Settings = () => {
                   { code: 'en', name: 'English', nativeName: 'English' },
                   { code: 'ar', name: 'العربية', nativeName: 'العربية' }
                 ]).map((lang) => {
-                  const isSelected = settings.language === lang.code;
+                  // ✅ Utiliser currentLanguage du contexte au lieu de settings.language pour éviter les désynchronisations
+                  const isSelected = currentLanguage === lang.code;
                   return (
                     <button
                       key={lang.code}
@@ -326,7 +326,10 @@ const Settings = () => {
               }}>
                 <p className={`${textColor} text-sm font-medium mb-2`}>
                   {getTranslation('settings.currentLanguagePreview', 'Langue actuelle')} : <span className={`${iconColor} font-semibold`}>
-                    {settings.language?.toUpperCase()}
+                    {/* ✅ Utiliser currentLanguage du contexte pour affichage correct */}
+                    {currentLanguage?.toUpperCase()} - {
+                      availableLanguages?.find(l => l.code === currentLanguage)?.name || currentLanguage
+                    }
                   </span>
                 </p>
                 <p className={`${secondaryTextColor} text-xs`}>

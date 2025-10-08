@@ -50,14 +50,8 @@ const Header = ({ toggleSidebar = () => {}, sidebarExpanded = true, isMobile = f
     setShowUserMenu(false);
   };
 
-  const renderGameTitle = () => {
-    const title = getTranslation('header.gamingClubTitle', 'Gaming Club');
-    const titleParts = title.split(' ');
-    
-    if (titleParts.length >= 2) {
-      return `${titleParts[0]} ${titleParts[1]}`;
-    }
-    
+  const renderTitle = () => {
+    const title = getTranslation('header.title', 'MalianDevs Template');
     return title;
   };
 
@@ -100,8 +94,8 @@ const Header = ({ toggleSidebar = () => {}, sidebarExpanded = true, isMobile = f
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center shadow-lg">
             <img 
-              src="/logo2.png" 
-              alt={getTranslation('header.logoAlt', "Gaming Club Logo")} 
+              src="/MalianDevs-logo.jpg" 
+              alt={getTranslation('header.logoAlt', "MalianDevs Template Logo")} 
               className="w-8 h-8 object-contain transition-transform duration-200 hover:scale-110"
               onError={(e) => {
                 e.target.style.display = 'none';
@@ -112,15 +106,15 @@ const Header = ({ toggleSidebar = () => {}, sidebarExpanded = true, isMobile = f
               className="text-white font-bold text-sm hidden items-center justify-center"
               style={{ display: 'none' }}
             >
-              GC
+              MD
             </span>
           </div>
           <div>
             <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 hover:scale-105">
-              {renderGameTitle()}
+              {renderTitle()}
             </h1>
             <p className="text-xs text-gray-400 hidden sm:block transition-colors duration-300">
-              {getTranslation('header.managementSystemSubtitle', 'Système de Gestion')}
+              {getTranslation('header.subtitle', 'Système de Gestion')}
             </p>
           </div>
         </div>

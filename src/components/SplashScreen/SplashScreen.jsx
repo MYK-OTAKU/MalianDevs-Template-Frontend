@@ -64,8 +64,8 @@ const SplashScreen = ({ controlled = false, fadeOut = false, maxDuration = 3000 
         animation: 'pulse 2s infinite'
       }}>
         <OptimizedImage 
-          src="/logo2.png" 
-          alt="Gaming Club Logo" 
+          src="/MalianDevs-logo.jpg" 
+          alt="MalianDevs Template Logo" 
           className="w-full h-full object-contain" 
           placeholder={true}
           placeholderColor="#8b5cf6"
@@ -73,7 +73,7 @@ const SplashScreen = ({ controlled = false, fadeOut = false, maxDuration = 3000 
       </div>
       
       <h1 className="text-3xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500">
-        Dahshboard Template
+        MalianDevs Template
       </h1>
       
       <div className="mt-6">
