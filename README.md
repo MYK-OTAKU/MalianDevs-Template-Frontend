@@ -185,6 +185,213 @@ Page de vérification du code à deux facteurs.
 - Support des applications d'authentification (Google Authenticator, etc.)
 - Retour à la connexion
 
+---
+
+## 🚀 Comment Ajouter une Nouvelle Page au Dashboard
+
+> ⚠️ **IMPORTANT** : Pour qu'une nouvelle page soit accessible dans le dashboard, vous devez déclarer les routes à **DEUX ENDROITS** :
+
+### Étape 1 : Créer la page
+
+1. **Créer le dossier et le composant** dans `src/pages/`
+```bash
+src/pages/
+└── MaNouvellePage/
+    ├── MaNouvellePage.jsx    # Composant principal
+    ├── index.js               # Export du composant
+    └── MaPageCard.jsx         # (optionnel) Sous-composants
+```
+
+2. **Créer le fichier index.js** pour faciliter l'import
+```javascript
+// src/pages/MaNouvellePage/index.js
+export { default } from './MaNouvellePage';
+```
+
+3. **Créer le composant** avec les hooks nécessaires
+```javascript
+// src/pages/MaNouvellePage/MaNouvellePage.jsx
+import React from 'react';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { useTheme } from '../../contexts/ThemeContext';
+
+const MaNouvellePage = () => {
+  const { getTranslation } = useLanguage();
+  const { effectiveTheme } = useTheme();
+  const isDarkMode = effectiveTheme === 'dark';
+
+  return (
+    <div className={`p-6 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+      <h1>{getTranslation('maPage.title', 'Ma Nouvelle Page')}</h1>
+      {/* Votre contenu ici */}
+    </div>
+  );
+};
+
+export default MaNouvellePage;
+```
+
+### Étape 2 : Ajouter les traductions
+
+Dans `src/locales/fr.json`, `en.json`, et `ar.json` :
+
+```json
+{
+  "navigation": {
+    "maPage": "Ma Page"
+  },
+  "maPage": {
+    "title": "Ma Nouvelle Page",
+    "subtitle": "Description de ma page"
+  }
+}
+```
+
+### Étape 3 : Créer la permission (Backend)
+
+Si la page nécessite une permission spécifique :
+
+```javascript
+// Backend - Dans un script de seed ou migration
+{
+  name: 'MA_PAGE_VIEW',
+  description: 'Voir ma nouvelle page'
+}
+```
+
+### Étape 4 : Déclarer les routes (Frontend)
+
+> 🔴 **CRITIQUE** : Les routes doivent être déclarées dans **DEUX fichiers** :
+
+#### A. Dans `src/components/Dashboard/Dashboard.jsx`
+
+```javascript
+// 1. Importer la page en haut du fichier
+import MaNouvellePage from '../../pages/MaNouvellePage/MaNouvellePage';
+
+// 2. Ajouter la route dans le <Routes>
+<Route path="/ma-page" element={
+  hasPermission('MA_PAGE_VIEW') ? <MaNouvellePage /> : <Navigate to="/dashboard" replace />
+} />
+```
+
+**Exemple complet dans Dashboard.jsx :**
+```javascript
+import MaNouvellePage from '../../pages/MaNouvellePage/MaNouvellePage';
+
+// ... dans le render
+<Routes>
+  <Route path="/" element={<Home />} />
+  
+  {/* ✅ Nouvelle route */}
+  <Route path="/ma-page" element={
+    hasPermission('MA_PAGE_VIEW') ? <MaNouvellePage /> : <Navigate to="/dashboard" replace />
+  } />
+  
+  {/* Autres routes... */}
+</Routes>
+```
+
+#### B. Dans `src/AppRoutes.jsx` (si vous l'utilisez)
+
+```javascript
+// 1. Importer la page
+import MaNouvellePage from './pages/MaNouvellePage/MaNouvellePage';
+
+// 2. Ajouter la route
+<Route path="/ma-page" element={
+  hasPermission('MA_PAGE_VIEW') 
+    ? <MaNouvellePage /> 
+    : <Navigate to="/" replace />
+} />
+```
+
+### Étape 5 : Ajouter le menu dans le Sidebar
+
+Dans `src/components/Sidebar/Sidebar.jsx` :
+
+```javascript
+// Importer l'icône (Lucide React)
+import { FileText } from 'lucide-react';
+
+// Dans le tableau menuItems
+const menuItems = [
+  { 
+    icon: <Home size={20} />, 
+    label: getTranslation('navigation.home', 'Accueil'), 
+    path: '/dashboard' 
+  },
+  // ✅ Ajouter votre menu
+  ...(hasPermission('MA_PAGE_VIEW') || hasPermission('ADMIN') ? [{
+    icon: <FileText size={20} />, 
+    label: getTranslation('navigation.maPage', 'Ma Page'), 
+    path: '/dashboard/ma-page'
+  }] : []),
+  // Autres menus...
+];
+```
+
+### 🎯 Checklist Complète
+
+Utilisez cette checklist pour ne rien oublier :
+
+- [ ] **Page créée** dans `src/pages/MaPage/`
+- [ ] **index.js** créé pour l'export
+- [ ] **Traductions ajoutées** dans fr.json, en.json, ar.json
+- [ ] **Permission créée** dans le backend (si nécessaire)
+- [ ] **Permission assignée** au rôle Admin dans le backend
+- [ ] **Import ajouté** dans `Dashboard.jsx`
+- [ ] **Route ajoutée** dans `Dashboard.jsx` (dans le `<Routes>`)
+- [ ] **Import ajouté** dans `AppRoutes.jsx` (si utilisé)
+- [ ] **Route ajoutée** dans `AppRoutes.jsx` (si utilisé)
+- [ ] **Menu ajouté** dans `Sidebar.jsx`
+- [ ] **Icône importée** (Lucide React)
+- [ ] **Se déconnecter/reconnecter** pour charger les nouvelles permissions
+- [ ] **Tester l'accès** à la page
+
+### ⚠️ Erreurs Courantes
+
+1. **"Page non trouvée" ou redirection** ➜ Route non déclarée dans `Dashboard.jsx`
+2. **"Menu n'apparaît pas"** ➜ Permission non chargée (déconnexion/reconnexion nécessaire)
+3. **"Permission denied"** ➜ Permission non assignée au rôle utilisateur
+4. **"Page blanche"** ➜ Erreur JS dans le composant (vérifier la console F12)
+5. **"Traductions manquantes"** ➜ Clés non ajoutées dans les fichiers de langue
+
+### 📚 Exemple Complet : Pages Catégories et Produits
+
+Les pages **Catégories** (`/dashboard/categories`) et **Produits** (`/dashboard/products`) suivent exactement ce pattern :
+
+**Dashboard.jsx :**
+```javascript
+import Categories from '../../pages/Categories/Categories';
+import Products from '../../pages/Products/Products';
+
+<Route path="/categories" element={
+  hasPermission('CATEGORIES_VIEW') ? <Categories /> : <Navigate to="/dashboard" replace />
+} />
+
+<Route path="/products" element={
+  hasPermission('CATEGORIES_VIEW') ? <Products /> : <Navigate to="/dashboard" replace />
+} />
+```
+
+**Sidebar.jsx :**
+```javascript
+...(hasPermission('CATEGORIES_VIEW') || hasPermission('ADMIN') ? [{
+  icon: <Package size={20} />, 
+  label: getTranslation('navigation.categories', 'Catégories'), 
+  path: '/dashboard/categories'
+}] : []),
+
+...(hasPermission('CATEGORIES_VIEW') || hasPermission('ADMIN') ? [{
+  icon: <ShoppingCart size={20} />, 
+  label: getTranslation('navigation.products', 'Produits'), 
+  path: '/dashboard/products'
+}] : []),
+```
+
+---
+
 ## 🏗 Architecture du projet
 
 Le projet suit une architecture modulaire et organisée pour faciliter la maintenance et l'évolutivité.

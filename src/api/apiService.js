@@ -49,8 +49,6 @@ api.interceptors.response.use(
     return response.data;
   },
   async (error) => {
-    const originalRequest = error.config;
-    
     console.error(`❌ ${error.response?.status || 'Network'} ${error.config?.url}:`, 
       error.response?.data?.message || error.message);
     

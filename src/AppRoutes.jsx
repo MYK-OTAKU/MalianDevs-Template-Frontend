@@ -10,6 +10,8 @@ import SettingsPage from './pages/Settings/Settings';
 import RolesPage from './pages/Roles/Roles';
 import PermissionsPage from './pages/Permissions/Permissions';
 import NotificationsPage from './pages/Notifications/Notifications';
+import CategoriesPage from './pages/Categories/Categories';
+import ProductsPage from './pages/Products/Products';
 
 // Composant de chargement invisible - aucun flash  
 const InvisibleLoader = () => null;
@@ -24,10 +26,17 @@ const AppRoutes = () => {
         {/* Route racine - correspond à /dashboard dans l'URL du navigateur */}
         <Route path="/" element={<HomePage />} />
         
-        {/* Routes pour les postes gaming */}
-        <Route path="/postes" element={
-          hasPermission('POSTES_VIEW') 
-            ? <PostesPage /> 
+        {/* Routes pour les catégories */}
+        <Route path="/categories" element={
+          hasPermission('CATEGORIES_VIEW') 
+            ? <CategoriesPage /> 
+            : <Navigate to="/" replace />
+        } />
+
+        {/* Routes pour les produits */}
+        <Route path="/products" element={
+          hasPermission('CATEGORIES_VIEW') 
+            ? <ProductsPage /> 
             : <Navigate to="/" replace />
         } />
         

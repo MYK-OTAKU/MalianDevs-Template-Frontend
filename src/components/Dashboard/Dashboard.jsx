@@ -12,7 +12,9 @@ import Roles from '../../pages/Roles/Roles';
 import Permissions from '../../pages/Permissions/Permissions';
 import Settings from '../../pages/Settings/Settings';
 import Monitoring from '../../pages/Monitoring/Monitoring';
-import Notifications from '../../pages/Notifications/Notifications'
+import Notifications from '../../pages/Notifications/Notifications';
+import Categories from '../../pages/Categories/Categories';
+import Products from '../../pages/Products/Products';
 
 const Dashboard = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
@@ -145,6 +147,15 @@ const Dashboard = () => {
           <div className="w-full h-full">
             <Routes>
               <Route path="/" element={<Home />} />
+              
+              {/* ✅ Routes Catégories et Produits - Permission CATEGORIES_VIEW */}
+              <Route path="/categories" element={
+                hasPermission('CATEGORIES_VIEW') ? <Categories /> : <Navigate to="/dashboard" replace />
+              } />
+              
+              <Route path="/products" element={
+                hasPermission('CATEGORIES_VIEW') ? <Products /> : <Navigate to="/dashboard" replace />
+              } />
               
               {/* ✅ CORRECTION: Utiliser USERS_VIEW */}
               <Route path="/users" element={

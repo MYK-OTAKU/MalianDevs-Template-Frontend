@@ -22,7 +22,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 
 const Sidebar = ({ expanded, toggleSidebar, isMobile }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const { user, logout, hasPermission } = useAuth();
+  const { user, hasPermission } = useAuth();
   const { getTranslation } = useLanguage();
   
   const navigate = useNavigate();
@@ -37,6 +37,7 @@ const Sidebar = ({ expanded, toggleSidebar, isMobile }) => {
       console.log('✅ Test PERMISSIONS_MANAGE:', hasPermission('PERMISSIONS_MANAGE'));
       console.log('✅ Test USERS_ADMIN:', hasPermission('USERS_ADMIN'));
       console.log('✅ Test FINANCE_VIEW:', hasPermission('FINANCE_VIEW'));
+      console.log('✅ Test CATEGORIES_VIEW:', hasPermission('CATEGORIES_VIEW'));
       console.log('✅ Test ADMIN:', hasPermission('ADMIN'));
     }
   }, [user, hasPermission]);
@@ -46,7 +47,20 @@ const Sidebar = ({ expanded, toggleSidebar, isMobile }) => {
     { 
       icon: <Home size={20} />, 
       label: getTranslation('navigation.home', 'Accueil'), 
-      path: '/dashboard' 
+      path: '/dashboard',
+      permission: null
+    },
+    { 
+      icon: <Package size={20} />, 
+      label: getTranslation('navigation.categories', 'Catégories'), 
+      path: '/dashboard/categories',
+      permission: 'CATEGORIES_VIEW'
+    },
+    { 
+      icon: <ShoppingCart size={20} />, 
+      label: getTranslation('navigation.products', 'Produits'), 
+      path: '/dashboard/products',
+      permission: 'CATEGORIES_VIEW'
     }
   ];
 
@@ -104,16 +118,6 @@ const Sidebar = ({ expanded, toggleSidebar, isMobile }) => {
     }
     
     navigate(path);
-  };
-  
-  const handleLogout = async (e) => {
-    e.preventDefault();
-    try {
-      await logout();
-      navigate('/');
-    } catch (error) {
-      console.error('Erreur lors de la déconnexion:', error);
-    }
   };
 
   // Styles fixes pour le sidebar (toujours thème sombre)
