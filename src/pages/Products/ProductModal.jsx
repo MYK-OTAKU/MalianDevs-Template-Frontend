@@ -34,6 +34,7 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
         imageUrl: product.imageUrl || '',
         isActive: product.isActive ?? true
       });
+      // Force preview à null si URL vide
       setImagePreview(product.imageUrl || null);
     }
   }, [product]);
@@ -79,7 +80,9 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
         ...formData,
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
-        categoryId: parseInt(formData.categoryId)
+        categoryId: parseInt(formData.categoryId),
+        // Ne pas envoyer imageUrl si vide
+        imageUrl: formData.imageUrl?.trim() || null
       };
       await onSave(productData);
     } catch (error) {
@@ -90,9 +93,14 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
   };
 
   const handleImageUrlChange = (e) => {
-    const url = e.target.value;
+    const url = e.target.value.trim(); // Trim pour éviter espaces
     setFormData({ ...formData, imageUrl: url });
-    setImagePreview(url);
+    // Force preview à null si vide ou invalide
+    if (!url || !url.startsWith('http')) {
+      setImagePreview(null);
+    } else {
+      setImagePreview(url);
+    }
   };
 
   const modalContent = (
@@ -103,7 +111,7 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
           rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto
         `}
       >
-        {/* Header */}
+        {/* Header (inchangé) */}
         <div className={`flex items-center justify-between p-6 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
           <h2 className="text-2xl font-bold">
             {product 
@@ -121,10 +129,10 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
           </button>
         </div>
 
-        {/* Form */}
+        {/* Form (inchangé sauf image) */}
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-4">
-            {/* Name */}
+            {/* Name (inchangé) */}
             <div>
               <label className="block text-sm font-medium mb-2">
                 {getTranslation('products.name', 'Nom')} *
@@ -149,7 +157,7 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
               )}
             </div>
 
-            {/* Description */}
+            {/* Description (inchangé) */}
             <div>
               <label className="block text-sm font-medium mb-2">
                 {getTranslation('products.description', 'Description')}
@@ -170,7 +178,7 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
               />
             </div>
 
-            {/* Price and Stock */}
+            {/* Price and Stock (inchangé) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Price */}
               <div>
@@ -226,7 +234,7 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
               </div>
             </div>
 
-            {/* Category */}
+            {/* Category (inchangé) */}
             <div>
               <label className="block text-sm font-medium mb-2">
                 {getTranslation('products.category', 'Catégorie')} *
@@ -256,7 +264,7 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
               )}
             </div>
 
-            {/* Image URL */}
+            {/* Image URL – corrigé pour preview réactive */}
             <div>
               <label className="block text-sm font-medium mb-2">
                 {getTranslation('products.imageUrl', 'URL de l\'image')}
@@ -276,14 +284,15 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
                 `}
               />
               
-              {/* Image Preview */}
+              {/* Image Preview avec lazy loading */}
               <div className={`mt-3 h-40 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg flex items-center justify-center overflow-hidden`}>
                 {imagePreview ? (
                   <img 
                     src={imagePreview} 
                     alt="Preview"
                     className="max-h-full max-w-full object-contain"
-                    onError={() => setImagePreview(null)}
+                    loading="lazy" // Lazy loading ajouté
+                    onError={() => setImagePreview(null)} // Reset sur erreur
                   />
                 ) : (
                   <div className="text-center">
@@ -296,7 +305,7 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
               </div>
             </div>
 
-            {/* Active Status */}
+            {/* Active Status (inchangé) */}
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
@@ -311,7 +320,7 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
             </div>
           </div>
 
-          {/* Actions */}
+          {/* Actions (inchangé) */}
           <div className="flex gap-3 mt-6">
             <button
               type="button"

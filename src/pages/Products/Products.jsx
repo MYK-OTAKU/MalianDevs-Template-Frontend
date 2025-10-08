@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Search, Grid, List, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Plus, Search, Grid, List, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useNotification } from '../../hooks/useNotification';
@@ -15,6 +15,7 @@ const Products = () => {
   const isDarkMode = effectiveTheme === 'dark';
   const { showSuccess, showError } = useNotification();
 
+  // États existants
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,14 +26,20 @@ const Products = () => {
   const [sortOrder, setSortOrder] = useState('ASC');
   const [viewMode, setViewMode] = useState('grid');
   
+  // Nouveaux états pour pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const PAGE_SIZE = 20; // 20 produits par page pour fluidité
+
   const [showModal, setShowModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
 
-  // Styles dynamiques basés sur le thème
+  // Styles dynamiques (inchangés)
   const getTextColorClass = (isPrimary) => isDarkMode ? (isPrimary ? 'text-white' : 'text-gray-400') : (isPrimary ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]');
-  const getBgClass = () => isDarkMode ? 'bg-gray-900' : 'bg-[var(--background-primary)]';
+//   const getBgClass = () => isDarkMode ? 'bg-gray-900' : 'bg-[var(--background-primary)]';
   const getCardBgClass = () => isDarkMode ? 'bg-gray-800' : 'bg-white';
   const getBorderColorClass = () => isDarkMode ? 'border-purple-400/20' : 'border-[var(--border-color)]';
   const getInputBorderClass = () => isDarkMode ? 'border-gray-600' : 'border-[var(--border-color)]';
@@ -44,25 +51,30 @@ const Products = () => {
   const getButtonHoverBgClass = () => isDarkMode ? 'hover:bg-purple-700' : 'hover:opacity-80';
   const getAccentColorClass = () => isDarkMode ? 'text-purple-400' : 'text-[var(--accent-color-primary)]';
 
-  const loadProducts = async () => {
+  // Fonction loadProducts mise à jour avec pagination
+  const loadProducts = useCallback(async (page = currentPage) => {
     try {
       setLoading(true);
       const params = {
+        page,
+        limit: PAGE_SIZE,
         search: searchTerm || undefined,
         isActive: filterActive === 'all' ? undefined : filterActive === 'active',
         categoryId: filterCategory === 'all' ? undefined : filterCategory,
         sortBy,
         sortOrder
       };
-      const data = await productService.getAll(params);
-      setProducts(data);
+      const response = await productService.getAll(params);
+      setProducts(response.data?.products || response.products || []); // Adaptation pour pagination
+      setTotalProducts(response.data?.pagination?.total || response.products?.length || 0);
+      setTotalPages(Math.ceil((response.data?.pagination?.total || 0) / PAGE_SIZE));
     } catch (error) {
       showError(getTranslation('products.errorLoad', 'Erreur lors du chargement des produits'));
       console.error('Error loading products:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, searchTerm, filterActive, filterCategory, sortBy, sortOrder, showError, getTranslation]);
 
   const loadCategories = async () => {
     try {
@@ -77,15 +89,25 @@ const Products = () => {
     loadCategories();
   }, []);
 
+  // Debounce pour loadProducts (inchangé, mais maintenant avec page)
   useEffect(() => {
     const timer = setTimeout(() => {
-      loadProducts();
-    }, 300); // Debounce de 300ms pour la recherche
+      setCurrentPage(1); // Reset à page 1 sur filtre/recherche
+      loadProducts(1);
+    }, 300);
 
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchTerm, filterActive, filterCategory, sortBy, sortOrder]);
+  }, [searchTerm, filterActive, filterCategory, sortBy, sortOrder, loadProducts]);
 
+  // Changement de page
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      loadProducts(newPage);
+    }
+  };
+
+  // Handlers existants (légèrement optimisés)
   const handleAdd = () => {
     setSelectedProduct(null);
     setShowModal(true);
@@ -105,7 +127,7 @@ const Products = () => {
     try {
       await productService.delete(productToDelete.id);
       showSuccess(getTranslation('products.deleteSuccess', 'Produit supprimé avec succès'));
-      loadProducts();
+      loadProducts(currentPage); // Reload page actuelle
     } catch (error) {
       showError(getTranslation('products.errorDelete', 'Erreur lors de la suppression du produit'));
       console.error('Error deleting product:', error);
@@ -119,7 +141,7 @@ const Products = () => {
     try {
       await productService.update(product.id, { isActive: !product.isActive });
       showSuccess(getTranslation('products.toggleSuccess', 'Statut du produit mis à jour'));
-      loadProducts();
+      loadProducts(currentPage);
     } catch (error) {
       showError(getTranslation('products.errorToggle', 'Erreur lors du changement de statut'));
       console.error('Error toggling product:', error);
@@ -137,16 +159,19 @@ const Products = () => {
       }
       setShowModal(false);
       setSelectedProduct(null);
-      loadProducts();
+      loadProducts(currentPage); // Reload page actuelle
     } catch (error) {
       showError(getTranslation('products.errorSave', 'Erreur lors de l\'enregistrement du produit'));
       console.error('Error saving product:', error);
     }
   };
 
+  // Résumé pagination pour affichage
+  const paginationInfo = `${(currentPage - 1) * PAGE_SIZE + 1}-${Math.min(currentPage * PAGE_SIZE, totalProducts)} sur ${totalProducts}`;
+
   return (
-    <div className={`min-h-screen  p-6`}>
-      {/* Header */}
+    <div className={`min-h-screen p-6`}>
+      {/* Header (inchangé) */}
       <div className="mb-6">
         <h1 className={`text-3xl font-bold mb-2 ${getTextColorClass(true)}`}>
           {getTranslation('products.title', 'Produits')} 🛍️
@@ -156,7 +181,7 @@ const Products = () => {
         </p>
       </div>
 
-      {/* Toolbar */}
+      {/* Toolbar (inchangé) */}
       <div className={`mb-6 p-4 rounded-lg border ${getBorderColorClass()} ${getCardBgClass()}`}
         style={{ background: 'var(--background-card)', backdropFilter: 'blur(10px)' }}>
         <div className="flex flex-col md:flex-row gap-4">
@@ -174,7 +199,7 @@ const Products = () => {
             </div>
           </div>
 
-          {/* Filters */}
+          {/* Filters (inchangé, mais sortOrder button ajusté) */}
           <div className="flex gap-2 flex-wrap">
             {/* Active Filter */}
             <select
@@ -217,6 +242,7 @@ const Products = () => {
             <button
               onClick={() => setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC')}
               className={`px-4 py-2 rounded-lg border ${getInputBorderClass()} ${getInputBgClass()} ${getInputTextClass()} hover:opacity-80 transition-colors`}
+              title={sortOrder === 'ASC' ? getTranslation('products.sortAscending', 'Ordre croissant') : getTranslation('products.sortDescending', 'Ordre décroissant')}
             >
               <ChevronDown 
                 size={20} 
@@ -231,6 +257,7 @@ const Products = () => {
                 className={`px-3 py-2 rounded-l-lg transition-colors ${
                   viewMode === 'grid' ? `${getButtonBgClass()} text-white` : `${getInputBgClass()} ${getTextColorClass(false)}`
                 }`}
+                title={getTranslation('products.viewGrid', 'Vue grille')}
               >
                 <Grid size={20} />
               </button>
@@ -239,6 +266,7 @@ const Products = () => {
                 className={`px-3 py-2 rounded-r-lg transition-colors ${
                   viewMode === 'list' ? `${getButtonBgClass()} text-white` : `${getInputBgClass()} ${getTextColorClass(false)}`
                 }`}
+                title={getTranslation('products.viewList', 'Vue liste')}
               >
                 <List size={20} />
               </button>
@@ -248,6 +276,7 @@ const Products = () => {
             <button
               onClick={handleAdd}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-white transition-colors ${getButtonBgClass()} ${getButtonHoverBgClass()}`}
+              title={getTranslation('products.addProduct', 'Ajouter un produit')}
             >
               <Plus size={20} />
               <span className="hidden sm:inline">{getTranslation('products.add', 'Ajouter')}</span>
@@ -268,25 +297,53 @@ const Products = () => {
           </p>
         </div>
       ) : (
-        <div className={viewMode === 'grid' 
-          ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' 
-          : 'space-y-2'
-        }>
-          {products.map(product => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              viewMode={viewMode}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onToggle={handleToggle}
-              categories={categories}
-            />
-          ))}
-        </div>
+        <>
+          <div className={viewMode === 'grid' 
+            ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' 
+            : 'space-y-2'
+          }>
+            {products.map(product => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                viewMode={viewMode}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onToggle={handleToggle}
+                categories={categories}
+              />
+            ))}
+          </div>
+
+          {/* Pagination (nouvelle section) */}
+          {totalPages > 1 && (
+            <div className={`mt-6 flex items-center justify-between ${getCardBgClass()} p-4 rounded-lg border ${getBorderColorClass()}`}>
+              <div className={getTextColorClass(false)}>
+                {paginationInfo} produits
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={`p-2 rounded-lg disabled:opacity-50 ${getInputBgClass()} ${getTextColorClass(false)}`}
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <span className={getTextColorClass(false)}>{currentPage} / {totalPages}</span>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className={`p-2 rounded-lg disabled:opacity-50 ${getInputBgClass()} ${getTextColorClass(false)}`}
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
-      {/* Modals */}
+      {/* Modals (inchangés) */}
       {showModal && (
         <ProductModal
           product={selectedProduct}

@@ -7,24 +7,24 @@ const productService = {
   /**
    * Récupérer tous les produits avec pagination et filtres
    * @param {Object} params - Paramètres de recherche (page, limit, search, categoryId, minPrice, maxPrice, inStock)
-   * @returns {Promise} Liste des produits paginée
+   * @returns {Promise} { products: [], pagination: { total, page, limit } }
    */
   getAll: async (params = {}) => {
     try {
       const response = await api.get('/products', { params });
-      // Le backend retourne { success, data: { products: [], pagination: {} } }
-      return response.data.data?.products || response.data.products || [];
+      // Assume backend retourne { success, data: { products: [], pagination: { total, page, limit } } }
+      // Ou fallback sur products simple si pas de pagination
+      return response.data.data || { 
+        products: response.data.data?.products || response.data.products || [], 
+        pagination: response.data.data?.pagination || { total: response.data.products?.length || 0 } 
+      };
     } catch (error) {
       console.error('Erreur lors de la récupération des produits:', error);
       throw error;
     }
   },
 
-  /**
-   * Récupérer un produit par son ID
-   * @param {number} id - ID du produit
-   * @returns {Promise} Détails du produit
-   */
+  // Reste inchangé...
   getById: async (id) => {
     try {
       const response = await api.get(`/products/${id}`);
@@ -35,11 +35,6 @@ const productService = {
     }
   },
 
-  /**
-   * Créer un nouveau produit
-   * @param {Object} data - Données du produit (name, description, price, stock, categoryId, imageUrl, isActive)
-   * @returns {Promise} Produit créé
-   */
   create: async (data) => {
     try {
       const response = await api.post('/products', data);
@@ -50,12 +45,6 @@ const productService = {
     }
   },
 
-  /**
-   * Mettre à jour un produit
-   * @param {number} id - ID du produit
-   * @param {Object} data - Données à mettre à jour
-   * @returns {Promise} Produit mis à jour
-   */
   update: async (id, data) => {
     try {
       const response = await api.put(`/products/${id}`, data);
@@ -66,11 +55,6 @@ const productService = {
     }
   },
 
-  /**
-   * Supprimer un produit
-   * @param {number} id - ID du produit
-   * @returns {Promise} Résultat de la suppression
-   */
   delete: async (id) => {
     try {
       const response = await api.delete(`/products/${id}`);
@@ -81,11 +65,6 @@ const productService = {
     }
   },
 
-  /**
-   * Upload d'une image de produit
-   * @param {File} file - Fichier image
-   * @returns {Promise} URL de l'image uploadée
-   */
   uploadImage: async (file) => {
     try {
       const formData = new FormData();

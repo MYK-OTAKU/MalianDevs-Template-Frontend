@@ -207,6 +207,7 @@ const Categories = () => {
                   ? `${getButtonBgClass()} text-white`
                   : `${getInputBgClass()} ${getTextColorClass(false)}`
               }`}
+              title={getTranslation('categories.viewGrid', 'Vue grille')}
             >
               <Grid size={20} />
             </button>
@@ -217,6 +218,7 @@ const Categories = () => {
                   ? `${getButtonBgClass()} text-white`
                   : `${getInputBgClass()} ${getTextColorClass(false)}`
               }`}
+              title={getTranslation('categories.viewList', 'Vue liste')}
             >
               <List size={20} />
             </button>
@@ -226,6 +228,7 @@ const Categories = () => {
           <button
             onClick={handleAdd}
             className={`px-4 py-2 rounded-lg ${getButtonBgClass()} ${getButtonHoverBgClass()} text-white font-medium transition-colors flex items-center gap-2 whitespace-nowrap`}
+            title={getTranslation('categories.addCategory', 'Ajouter une catégorie')}
           >
             <Plus size={20} />
             {getTranslation('categories.add', 'Ajouter')}

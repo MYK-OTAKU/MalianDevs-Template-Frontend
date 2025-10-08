@@ -3,7 +3,7 @@ import { Edit, Trash2, Power, PowerOff, Package } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
 
-const ProductCard = ({ product, viewMode, onEdit, onDelete, onToggle, categories }) => {
+const ProductCard = React.memo(({ product, viewMode, onEdit, onDelete, onToggle, categories }) => { // React.memo ajouté
   const { getTranslation } = useLanguage();
   const { effectiveTheme } = useTheme();
   const isDarkMode = effectiveTheme === 'dark';
@@ -46,16 +46,17 @@ const ProductCard = ({ product, viewMode, onEdit, onDelete, onToggle, categories
       <div className={`
         ${isDarkMode ? 'bg-gray-800' : 'bg-white'} 
         rounded-lg shadow-md overflow-hidden
-        transition-all duration-200 hover:shadow-xl
+        transition-all duration-100 hover:shadow-xl // Durée réduite pour moins de lag au scroll
         relative
       `}>
-        {/* Image */}
+        {/* Image avec lazy loading */}
         <div className={`h-48 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} relative`}>
           {product.imageUrl ? (
             <img 
               src={product.imageUrl} 
               alt={product.name}
               className="w-full h-full object-cover"
+              loading="lazy" // Lazy loading ajouté
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -76,7 +77,7 @@ const ProductCard = ({ product, viewMode, onEdit, onDelete, onToggle, categories
           </div>
         </div>
 
-        {/* Content */}
+        {/* Content (inchangé) */}
         <div className="p-4">
           {/* Category Badge */}
           {category && (
@@ -136,6 +137,7 @@ const ProductCard = ({ product, viewMode, onEdit, onDelete, onToggle, categories
                   ? 'bg-blue-900/20 text-blue-400 hover:bg-blue-900/30' 
                   : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
               } transition-colors`}
+              title={getTranslation('products.edit', 'Modifier')}
             >
               <Edit size={16} />
             </button>
@@ -146,6 +148,7 @@ const ProductCard = ({ product, viewMode, onEdit, onDelete, onToggle, categories
                   ? 'bg-red-900/20 text-red-400 hover:bg-red-900/30' 
                   : 'bg-red-100 text-red-700 hover:bg-red-200'
               } transition-colors`}
+              title={getTranslation('products.delete', 'Supprimer')}
             >
               <Trash2 size={16} />
             </button>
@@ -155,12 +158,12 @@ const ProductCard = ({ product, viewMode, onEdit, onDelete, onToggle, categories
     );
   }
 
-  // List View
+  // List View (image lazy loading ajouté)
   return (
     <div className={`
       ${isDarkMode ? 'bg-gray-800' : 'bg-white'} 
       rounded-lg shadow-md overflow-hidden
-      transition-all duration-200 hover:shadow-lg
+      transition-all duration-100 hover:shadow-lg // Durée réduite
       p-4
     `}>
       <div className="flex items-center gap-4">
@@ -171,6 +174,7 @@ const ProductCard = ({ product, viewMode, onEdit, onDelete, onToggle, categories
               src={product.imageUrl} 
               alt={product.name}
               className="w-full h-full object-cover rounded"
+              loading="lazy" // Lazy loading ajouté
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -179,7 +183,7 @@ const ProductCard = ({ product, viewMode, onEdit, onDelete, onToggle, categories
           )}
         </div>
 
-        {/* Info */}
+        {/* Info (inchangé) */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="text-lg font-semibold truncate">{product.name}</h3>
@@ -250,6 +254,7 @@ const ProductCard = ({ product, viewMode, onEdit, onDelete, onToggle, categories
                 ? 'bg-blue-900/20 text-blue-400 hover:bg-blue-900/30' 
                 : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
             } transition-colors`}
+            title={getTranslation('products.edit', 'Modifier')}
           >
             <Edit size={16} />
           </button>
@@ -260,6 +265,7 @@ const ProductCard = ({ product, viewMode, onEdit, onDelete, onToggle, categories
                 ? 'bg-red-900/20 text-red-400 hover:bg-red-900/30' 
                 : 'bg-red-100 text-red-700 hover:bg-red-200'
             } transition-colors`}
+            title={getTranslation('products.delete', 'Supprimer')}
           >
             <Trash2 size={16} />
           </button>
@@ -267,6 +273,8 @@ const ProductCard = ({ product, viewMode, onEdit, onDelete, onToggle, categories
       </div>
     </div>
   );
-};
+});
+
+ProductCard.displayName = 'ProductCard'; // Pour debug si besoin
 
 export default ProductCard;
