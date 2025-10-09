@@ -65,7 +65,8 @@
     "active": "نشط",
     "inactive": "غير نشط",
     "enabled": "مفعل",
-    "disabled": "معطل"
+    "disabled": "معطل",
+    "or": "أو"
   },
   "settingsTitle": "الإعدادات",
   "settingsDescription": "خصّص تجربتك",
@@ -772,6 +773,12 @@
     "errorDelete": "خطأ في حذف المنتج",
     "errorToggle": "خطأ في تغيير الحالة",
     "errorUploadImage": "خطأ في تحميل الصورة",
+    "uploadImage": "تحميل صورة",
+    "uploading": "جاري التحميل...",
+    "removeImage": "إزالة الصورة",
+    "imageTypeError": "نوع الملف غير مدعوم. استخدم JPG أو PNG أو GIF أو WebP.",
+    "imageSizeError": "الملف كبير جداً (الحد الأقصى 5MB).",
+    "noImage": "لا توجد صورة",
     "errorNameRequired": "الاسم مطلوب",
     "errorPriceRequired": "السعر مطلوب",
     "errorPriceInvalid": "يجب أن يكون السعر أكبر من 0",
@@ -785,6 +792,11 @@
     "imageUrlPlaceholder": "https://example.com/image.jpg",
     "gridView": "شبكة",
     "listView": "قائمة",
+    "priceRange": "نطاق السعر",
+    "minPrice": "السعر الأدنى",
+    "maxPrice": "السعر الأقصى"
+  }
+}    "listView": "قائمة",
     "priceRange": "نطاق السعر",
     "minPrice": "السعر الأدنى",
     "maxPrice": "السعر الأقصى"

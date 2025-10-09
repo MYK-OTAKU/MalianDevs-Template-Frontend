@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload, Package } from 'lucide-react';
+import { X, Upload, Package, Camera, Trash2 } from 'lucide-react';
 import ReactDOM from 'react-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import productService from '../../services/productService';
 
 const ProductModal = ({ product, categories, onSave, onCancel }) => {
   const { getTranslation } = useLanguage();
@@ -22,6 +23,8 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
 
   useEffect(() => {
     if (product) {
@@ -34,8 +37,22 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
         imageUrl: product.imageUrl || '',
         isActive: product.isActive ?? true
       });
-      // Force preview à null si URL vide
-      setImagePreview(product.imageUrl || null);
+      
+      // Set preview and check if it's an uploaded image
+      if (product.imageUrl) {
+        setImagePreview(product.imageUrl);
+        // Check if it's a locally uploaded image
+        if (product.imageUrl.includes('/uploads/')) {
+          setUploadedImageUrl(product.imageUrl);
+        }
+      } else {
+        setImagePreview(null);
+        setUploadedImageUrl(null);
+      }
+    } else {
+      // Reset for new product
+      setImagePreview(null);
+      setUploadedImageUrl(null);
     }
   }, [product]);
 
@@ -101,6 +118,53 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
     } else {
       setImagePreview(url);
     }
+    // Reset uploaded image if user types manually
+    if (uploadedImageUrl && url !== uploadedImageUrl) {
+      setUploadedImageUrl(null);
+    }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert(getTranslation('products.imageTypeError', 'Type de fichier non autorisé. Utilisez JPG, PNG, GIF ou WebP.'));
+      return;
+    }
+
+    // Validate file size (5MB max)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      alert(getTranslation('products.imageSizeError', 'Le fichier est trop volumineux (5MB maximum).'));
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const response = await productService.uploadImage(file);
+      if (response.success) {
+        const imageUrl = `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3000'}${response.data.imageUrl}`;
+        setUploadedImageUrl(imageUrl);
+        setFormData({ ...formData, imageUrl });
+        setImagePreview(imageUrl);
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert(getTranslation('products.imageUploadError', 'Erreur lors de l\'upload de l\'image'));
+    } finally {
+      setUploadingImage(false);
+      // Reset file input
+      e.target.value = '';
+    }
+  };
+
+  const removeUploadedImage = () => {
+    setUploadedImageUrl(null);
+    setFormData({ ...formData, imageUrl: '' });
+    setImagePreview(null);
   };
 
   const modalContent = (
@@ -264,11 +328,47 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
               )}
             </div>
 
-            {/* Image URL – corrigé pour preview réactive */}
+            {/* Image URL – with upload functionality */}
             <div>
               <label className="block text-sm font-medium mb-2">
-                {getTranslation('products.imageUrl', 'URL de l\'image')}
+                {getTranslation('products.imageUrl', 'Image du produit')}
               </label>
+              
+              {/* Upload Button */}
+              <div className="mb-3">
+                <label className={`
+                  inline-flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer
+                  ${isDarkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'}
+                  text-white transition-colors
+                  ${uploadingImage ? 'opacity-50 cursor-not-allowed' : ''}
+                `}>
+                  {uploadingImage ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      {getTranslation('products.uploading', 'Upload en cours...')}
+                    </>
+                  ) : (
+                    <>
+                      <Camera size={16} />
+                      {getTranslation('products.uploadImage', 'Uploader une image')}
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    disabled={uploadingImage}
+                  />
+                </label>
+              </div>
+
+              {/* Or separator */}
+              <div className="text-center text-sm text-gray-500 mb-3">
+                {getTranslation('common.or', 'ou')}
+              </div>
+
+              {/* Manual URL Input */}
               <input
                 type="url"
                 value={formData.imageUrl}
@@ -284,16 +384,135 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
                 `}
               />
               
-              {/* Image Preview avec lazy loading */}
-              <div className={`mt-3 h-40 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg flex items-center justify-center overflow-hidden`}>
+              {/* Image Preview with delete option */}
+              <div className={`mt-3 h-40 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg flex items-center justify-center overflow-hidden relative`}>
                 {imagePreview ? (
-                  <img 
-                    src={imagePreview} 
-                    alt="Preview"
-                    className="max-h-full max-w-full object-contain"
-                    loading="lazy" // Lazy loading ajouté
-                    onError={() => setImagePreview(null)} // Reset sur erreur
-                  />
+                  <>
+                    <img 
+                      src={imagePreview} 
+                      alt="Preview"
+                      className="max-h-full max-w-full object-contain"
+                      loading="lazy"
+                      onError={() => setImagePreview(null)}
+                    />
+                    {uploadedImageUrl && (
+                      <button
+                        type="button"
+                        onClick={removeUploadedImage}
+                        className="absolute top-2 right-2 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
+                        title={getTranslation('products.removeImage', 'Supprimer l\'image')}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center">
+                    <Package size={48} className={isDarkMode ? 'text-gray-600 mx-auto mb-2' : 'text-gray-400 mx-auto mb-2'} />
+                    <p className={`text-sm ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                      {getTranslation('products.noImage', 'Aucune image')}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Active Status (inchangé) */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="isActive"
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+              />
+              <label htmlFor="isActive" className="text-sm font-medium cursor-pointer">
+                {getTranslation('products.active', 'Actif')}
+              </label>
+            </div>
+          </div>
+
+          {/* Actions (inchangé) */}
+          <div className="flex gap-3 mt-6">
+            <button
+              type="button"
+              onClick={onCancel}
+              className={`
+                flex-1 px-4 py-2 rounded-lg font-medium
+                ${isDarkMode 
+                  ? 'bg-gray-700 hover:bg-gray-600 text-white' 
+                  : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
+                }
+                transition-colors
+              `}
+              disabled={loading}
+            >
+              {getTranslation('common.cancel', 'Annuler')}
+            </button>
+            <button
+              type="submit"
+              className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading}
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  {getTranslation('common.loading', 'Chargement...')}
+                </span>
+              ) : (
+                getTranslation('common.save', 'Enregistrer')
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+
+  return ReactDOM.createPortal(modalContent, document.body);
+};
+
+export default ProductModal;                {getTranslation('common.or', 'ou')}
+              </div>
+
+              {/* Manual URL Input */}
+              <input
+                type="url"
+                value={formData.imageUrl}
+                onChange={handleImageUrlChange}
+                placeholder={getTranslation('products.imageUrlPlaceholder', 'https://exemple.com/image.jpg')}
+                className={`
+                  w-full px-4 py-2 rounded-lg border
+                  ${isDarkMode 
+                    ? 'bg-gray-700 border-gray-600 text-white' 
+                    : 'bg-white border-gray-300 text-gray-900'
+                  }
+                  focus:outline-none focus:ring-2 focus:ring-purple-500
+                `}
+              />
+              
+              {/* Image Preview with delete option */}
+              <div className={`mt-3 h-40 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg flex items-center justify-center overflow-hidden relative`}>
+                {imagePreview ? (
+                  <>
+                    <img 
+                      src={imagePreview} 
+                      alt="Preview"
+                      className="max-h-full max-w-full object-contain"
+                      loading="lazy"
+                      onError={() => setImagePreview(null)}
+                    />
+                    {uploadedImageUrl && (
+                      <button
+                        type="button"
+                        onClick={removeUploadedImage}
+                        className="absolute top-2 right-2 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
+                        title={getTranslation('products.removeImage', 'Supprimer l\'image')}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </>
                 ) : (
                   <div className="text-center">
                     <Package size={48} className={isDarkMode ? 'text-gray-600 mx-auto mb-2' : 'text-gray-400 mx-auto mb-2'} />

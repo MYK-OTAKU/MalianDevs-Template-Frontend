@@ -65,7 +65,8 @@
     "active": "Active",
     "inactive": "Inactive",
     "enabled": "Enabled",
-    "disabled": "Disabled"
+    "disabled": "Disabled",
+    "or": "or"
   },
   "settingsTitle": "Settings",
   "settingsDescription": "Customize your experience",
@@ -772,6 +773,12 @@
     "errorDelete": "Error deleting product",
     "errorToggle": "Error changing status",
     "errorUploadImage": "Error uploading image",
+    "uploadImage": "Upload image",
+    "uploading": "Uploading...",
+    "removeImage": "Remove image",
+    "imageTypeError": "Invalid file type. Use JPG, PNG, GIF or WebP.",
+    "imageSizeError": "File is too large (5MB maximum).",
+    "noImage": "No image",
     "errorNameRequired": "Name is required",
     "errorPriceRequired": "Price is required",
     "errorPriceInvalid": "Price must be greater than 0",
@@ -785,6 +792,11 @@
     "imageUrlPlaceholder": "https://example.com/image.jpg",
     "gridView": "Grid",
     "listView": "List",
+    "priceRange": "Price range",
+    "minPrice": "Minimum price",
+    "maxPrice": "Maximum price"
+  }
+}    "listView": "List",
     "priceRange": "Price range",
     "minPrice": "Minimum price",
     "maxPrice": "Maximum price"

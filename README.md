@@ -167,7 +167,36 @@ Configuration et préférences utilisateur.
 
 **Accessible :** Tous les utilisateurs connectés
 
-### 9. **Login** (`/`)
+### 9. **Catégories** (`/dashboard/categories`)
+Gestion complète des catégories de produits.
+
+**Fonctionnalités :**
+- Création/modification/suppression de catégories
+- Changement d'ordre d'affichage (drag & drop)
+- Gestion des statuts (actif/inactif)
+- Configuration des icônes et couleurs
+- Vue temps réel du nombre de produits par catégorie
+- Filtrage et recherche
+- Vue grille et liste
+
+**Permission requise :** `CATEGORIES_VIEW`
+
+### 10. **Produits** (`/dashboard/products`)
+Gestion complète des produits avec relations aux catégories.
+
+**Fonctionnalités :**
+- Création/modification/suppression de produits
+- Gestion des stocks avec alertes
+- Attribution aux catégories
+- Support d'images produits (URL)
+- Filtrage et recherche avancée
+- Vue grille et liste responsive
+- Pagination optimisée (20 items/page)
+- Tri par nom, prix, stock, date
+
+**Permission requise :** `PRODUCTS_VIEW`
+
+### 11. **Login** (`/`)
 Page de connexion sécurisée.
 
 **Fonctionnalités :**
@@ -176,7 +205,7 @@ Page de connexion sécurisée.
 - Mot de passe oublié (lien)
 - Design moderne avec animations
 
-### 10. **Vérification 2FA** (`/verify-2fa`)
+### 12. **Vérification 2FA** (`/verify-2fa`)
 Page de vérification du code à deux facteurs.
 
 **Fonctionnalités :**
@@ -433,6 +462,8 @@ src/
 │   ├── Users/            # Page gestion utilisateurs
 │   ├── Roles/            # Page gestion rôles
 │   ├── Permissions/      # Page gestion permissions
+│   ├── Categories/       # Page gestion catégories
+│   ├── Products/         # Page gestion produits
 │   ├── Postes/           # Page gestion postes gaming
 │   ├── Monitoring/       # Page monitoring système
 │   ├── Notifications/    # Page centre notifications
