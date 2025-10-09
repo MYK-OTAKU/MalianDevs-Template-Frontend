@@ -822,16 +822,13 @@
     "descriptionPlaceholder": "Description du produit",
     "pricePlaceholder": "0.00",
     "stockPlaceholder": "0",
-    "imageUrlPlaceholder": "https://exemple.com/image.jpg",
+    "imageUrlPlaceholder": "Ou coller l'URL d'une image...",
     "gridView": "Grille",
     "listView": "Liste",
     "priceRange": "Plage de prix",
     "minPrice": "Prix minimum",
-    "maxPrice": "Prix maximum"
-  }
-}    "listView": "Liste",
-    "priceRange": "Plage de prix",
-    "minPrice": "Prix minimum",
-    "maxPrice": "Prix maximum"
+    "maxPrice": "Prix maximum",
+    "loadingImage": "Chargement de l'image...",
+    "optional": "optionnel"
   }
 }

@@ -779,6 +779,8 @@
     "imageTypeError": "Invalid file type. Use JPG, PNG, GIF or WebP.",
     "imageSizeError": "File is too large (5MB maximum).",
     "noImage": "No image",
+    "loadingImage": "Loading image...",
+    "optional": "optional",
     "errorNameRequired": "Name is required",
     "errorPriceRequired": "Price is required",
     "errorPriceInvalid": "Price must be greater than 0",
@@ -792,11 +794,6 @@
     "imageUrlPlaceholder": "https://example.com/image.jpg",
     "gridView": "Grid",
     "listView": "List",
-    "priceRange": "Price range",
-    "minPrice": "Minimum price",
-    "maxPrice": "Maximum price"
-  }
-}    "listView": "List",
     "priceRange": "Price range",
     "minPrice": "Minimum price",
     "maxPrice": "Maximum price"

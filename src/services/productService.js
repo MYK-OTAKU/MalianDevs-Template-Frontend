@@ -93,13 +93,4 @@ const productService = {
   }
 };
 
-export default productService;      const response = await api.delete(`/products/image/${filename}`);
-      return response.data;
-    } catch (error) {
-      console.error('Erreur lors de la suppression de l\'image:', error);
-      throw error;
-    }
-  }
-};
-
 export default productService;

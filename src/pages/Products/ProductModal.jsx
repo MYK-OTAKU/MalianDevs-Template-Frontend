@@ -142,6 +142,14 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
       return;
     }
 
+    // Show immediate preview using FileReader for better UX
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setImagePreview(event.target.result);
+    };
+    reader.readAsDataURL(file);
+
+    // Upload in background without blocking UI
     setUploadingImage(true);
     try {
       const response = await productService.uploadImage(file);
@@ -149,11 +157,13 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
         const imageUrl = `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3000'}${response.data.imageUrl}`;
         setUploadedImageUrl(imageUrl);
         setFormData({ ...formData, imageUrl });
-        setImagePreview(imageUrl);
+        // Keep the preview we already set from FileReader
       }
     } catch (error) {
       console.error('Error uploading image:', error);
       alert(getTranslation('products.imageUploadError', 'Erreur lors de l\'upload de l\'image'));
+      // Reset preview on error
+      setImagePreview(null);
     } finally {
       setUploadingImage(false);
       // Reset file input
@@ -328,200 +338,116 @@ const ProductModal = ({ product, categories, onSave, onCancel }) => {
               )}
             </div>
 
-            {/* Image URL – with upload functionality */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
+            {/* Image Section - More prominent and optimized */}
+            <div className={`p-4 rounded-lg border-2 border-dashed ${
+              isDarkMode ? 'border-gray-600 bg-gray-700/30' : 'border-gray-300 bg-gray-50'
+            }`}>
+              <label className="block text-sm font-medium mb-3 flex items-center gap-2">
+                <Camera size={18} />
                 {getTranslation('products.imageUrl', 'Image du produit')}
+                <span className="text-xs text-gray-500">({getTranslation('common.optional', 'optionnel')})</span>
               </label>
               
-              {/* Upload Button */}
-              <div className="mb-3">
+              {/* Upload Options */}
+              <div className="space-y-3">
+                {/* File Upload Button */}
                 <label className={`
-                  inline-flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer
-                  ${isDarkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'}
-                  text-white transition-colors
-                  ${uploadingImage ? 'opacity-50 cursor-not-allowed' : ''}
-                `}>
-                  {uploadingImage ? (
+                  flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg cursor-pointer border-2 border-dashed
+                  ${isDarkMode ? 'border-blue-400 bg-blue-900/20 hover:bg-blue-900/30 text-blue-400' : 'border-blue-500 bg-blue-50 hover:bg-blue-100 text-blue-600'}
+                  transition-all duration-200
+                  ${uploadingImage ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'}
+                `}>                  {uploadingImage ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
                       {getTranslation('products.uploading', 'Upload en cours...')}
                     </>
                   ) : (
                     <>
-                      <Camera size={16} />
-                      {getTranslation('products.uploadImage', 'Uploader une image')}
+                      <Upload size={20} />
+                      <span className="font-medium">
+                        {getTranslation('products.uploadImage', 'Cliquer pour uploader une image')}
+                      </span>
+                      <span className="text-xs opacity-75">
+                        JPG, PNG, GIF, WebP (max 5MB)
+                      </span>
                     </>
                   )}
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
                     onChange={handleImageUpload}
                     className="hidden"
                     disabled={uploadingImage}
                   />
                 </label>
-              </div>
 
-              {/* Or separator */}
-              <div className="text-center text-sm text-gray-500 mb-3">
-                {getTranslation('common.or', 'ou')}
-              </div>
+                {/* Separator */}
+                <div className="flex items-center gap-2">
+                  <div className={`flex-1 h-px ${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
+                  <span className="text-xs text-gray-500 px-2">
+                    {getTranslation('common.or', 'ou')}
+                  </span>
+                  <div className={`flex-1 h-px ${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
+                </div>
 
-              {/* Manual URL Input */}
-              <input
-                type="url"
-                value={formData.imageUrl}
-                onChange={handleImageUrlChange}
-                placeholder={getTranslation('products.imageUrlPlaceholder', 'https://exemple.com/image.jpg')}
-                className={`
-                  w-full px-4 py-2 rounded-lg border
-                  ${isDarkMode 
-                    ? 'bg-gray-700 border-gray-600 text-white' 
-                    : 'bg-white border-gray-300 text-gray-900'
-                  }
-                  focus:outline-none focus:ring-2 focus:ring-purple-500
-                `}
-              />
+                {/* URL Input */}
+                <div>
+                  <input
+                    type="url"
+                    value={formData.imageUrl}
+                    onChange={handleImageUrlChange}
+                    placeholder={getTranslation('products.imageUrlPlaceholder', 'Ou coller l\'URL d\'une image...')}
+                    className={`
+                      w-full px-4 py-2 rounded-lg border
+                      ${isDarkMode 
+                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                      }
+                      focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                    `}
+                  />
+                </div>
+              </div>
               
-              {/* Image Preview with delete option */}
-              <div className={`mt-3 h-40 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg flex items-center justify-center overflow-hidden relative`}>
-                {imagePreview ? (
-                  <>
-                    <img 
-                      src={imagePreview} 
-                      alt="Preview"
-                      className="max-h-full max-w-full object-contain"
-                      loading="lazy"
-                      onError={() => setImagePreview(null)}
-                    />
-                    {uploadedImageUrl && (
-                      <button
-                        type="button"
-                        onClick={removeUploadedImage}
-                        className="absolute top-2 right-2 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
-                        title={getTranslation('products.removeImage', 'Supprimer l\'image')}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    )}
-                  </>
-                ) : (
-                  <div className="text-center">
-                    <Package size={48} className={isDarkMode ? 'text-gray-600 mx-auto mb-2' : 'text-gray-400 mx-auto mb-2'} />
-                    <p className={`text-sm ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                      {getTranslation('products.noImage', 'Aucune image')}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Active Status (inchangé) */}
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="isActive"
-                checked={formData.isActive}
-                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
-              />
-              <label htmlFor="isActive" className="text-sm font-medium cursor-pointer">
-                {getTranslation('products.active', 'Actif')}
-              </label>
-            </div>
-          </div>
-
-          {/* Actions (inchangé) */}
-          <div className="flex gap-3 mt-6">
-            <button
-              type="button"
-              onClick={onCancel}
-              className={`
-                flex-1 px-4 py-2 rounded-lg font-medium
-                ${isDarkMode 
-                  ? 'bg-gray-700 hover:bg-gray-600 text-white' 
-                  : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
-                }
-                transition-colors
-              `}
-              disabled={loading}
-            >
-              {getTranslation('common.cancel', 'Annuler')}
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={loading}
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  {getTranslation('common.loading', 'Chargement...')}
-                </span>
-              ) : (
-                getTranslation('common.save', 'Enregistrer')
+              {/* Lazy Image Preview */}
+              {(imagePreview || uploadedImageUrl) && (
+                <div className={`mt-4 h-32 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg flex items-center justify-center overflow-hidden relative border`}>
+                  {imagePreview ? (
+                    <>
+                      <img 
+                        src={imagePreview} 
+                        alt="Preview"
+                        className="max-h-full max-w-full object-contain"
+                        loading="lazy"
+                        onError={() => {
+                          setImagePreview(null);
+                          if (uploadedImageUrl) setUploadedImageUrl(null);
+                        }}
+                        onLoad={() => {
+                          // Image loaded successfully - no action needed
+                        }}
+                      />
+                      {uploadedImageUrl && (
+                        <button
+                          type="button"
+                          onClick={removeUploadedImage}
+                          className="absolute top-1 right-1 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors shadow-lg"
+                          title={getTranslation('products.removeImage', 'Supprimer l\'image')}
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center">
+                      <Package size={24} className={isDarkMode ? 'text-gray-600 mx-auto mb-1' : 'text-gray-400 mx-auto mb-1'} />
+                      <p className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                        {getTranslation('products.loadingImage', 'Chargement...')}
+                      </p>
+                    </div>
+                  )}
+                </div>
               )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-
-  return ReactDOM.createPortal(modalContent, document.body);
-};
-
-export default ProductModal;                {getTranslation('common.or', 'ou')}
-              </div>
-
-              {/* Manual URL Input */}
-              <input
-                type="url"
-                value={formData.imageUrl}
-                onChange={handleImageUrlChange}
-                placeholder={getTranslation('products.imageUrlPlaceholder', 'https://exemple.com/image.jpg')}
-                className={`
-                  w-full px-4 py-2 rounded-lg border
-                  ${isDarkMode 
-                    ? 'bg-gray-700 border-gray-600 text-white' 
-                    : 'bg-white border-gray-300 text-gray-900'
-                  }
-                  focus:outline-none focus:ring-2 focus:ring-purple-500
-                `}
-              />
-              
-              {/* Image Preview with delete option */}
-              <div className={`mt-3 h-40 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg flex items-center justify-center overflow-hidden relative`}>
-                {imagePreview ? (
-                  <>
-                    <img 
-                      src={imagePreview} 
-                      alt="Preview"
-                      className="max-h-full max-w-full object-contain"
-                      loading="lazy"
-                      onError={() => setImagePreview(null)}
-                    />
-                    {uploadedImageUrl && (
-                      <button
-                        type="button"
-                        onClick={removeUploadedImage}
-                        className="absolute top-2 right-2 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
-                        title={getTranslation('products.removeImage', 'Supprimer l\'image')}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    )}
-                  </>
-                ) : (
-                  <div className="text-center">
-                    <Package size={48} className={isDarkMode ? 'text-gray-600 mx-auto mb-2' : 'text-gray-400 mx-auto mb-2'} />
-                    <p className={`text-sm ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                      {getTranslation('products.noImage', 'Aucune image')}
-                    </p>
-                  </div>
-                )}
-              </div>
             </div>
 
             {/* Active Status (inchangé) */}

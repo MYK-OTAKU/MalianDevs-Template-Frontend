@@ -789,16 +789,13 @@
     "descriptionPlaceholder": "وصف المنتج",
     "pricePlaceholder": "0.00",
     "stockPlaceholder": "0",
-    "imageUrlPlaceholder": "https://example.com/image.jpg",
+    "imageUrlPlaceholder": "أو الصق رابط الصورة...",
     "gridView": "شبكة",
     "listView": "قائمة",
     "priceRange": "نطاق السعر",
     "minPrice": "السعر الأدنى",
-    "maxPrice": "السعر الأقصى"
-  }
-}    "listView": "قائمة",
-    "priceRange": "نطاق السعر",
-    "minPrice": "السعر الأدنى",
-    "maxPrice": "السعر الأقصى"
+    "maxPrice": "السعر الأقصى",
+    "loadingImage": "جاري تحميل الصورة...",
+    "optional": "اختياري"
   }
 }
