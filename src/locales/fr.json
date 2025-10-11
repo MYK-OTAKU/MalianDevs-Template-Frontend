@@ -15,7 +15,7 @@
     "passwordPlaceholder": "Entrez votre mot de passe",
     "copyright": "Tous droits réservés.",
     "logoFallback": "DT",
-    "logoAlt": "Logo Dashboard Template",
+    "logoAlt": "Logo MINDEVS Template",
     "processing": "Traitement..."
   },
   "navigation": {
@@ -616,10 +616,10 @@
   },
   "appVersionValue": "Template de Tableau de Bord v1.0.0",
   "header": {
-    "title": "MalianDevs Template",
+    "title": "MINDEVS Template",
     "subtitle": "Système de Gestion",
     "notificationsHeader": "Notifications",
-    "logoAlt": "Logo MalianDevs Template"
+    "logoAlt": "Logo MINDEVS Template"
   },
   "home": {
     "databaseStatus": "Base de données",

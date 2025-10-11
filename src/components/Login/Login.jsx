@@ -96,7 +96,7 @@ const LoginPage = () => {
 
   // Preload critical images
   useEffect(() => {
-    const preloadImages = ['/MalianDevs-logo.jpg', '/MalianDevs-logo.jpg'];
+    const preloadImages = ['/logo.png', '/logo.png'];
     preloadImages.forEach(src => {
       const img = new Image();
       img.src = src;
@@ -287,7 +287,7 @@ const LoginPage = () => {
               }}
             >
               <OptimizedImage
-                src="/MalianDevs-logo.jpg"
+                src="/logo.png"
                 alt={getTranslation('auth.logoAlt', 'Logo Dashboard Template')}
                 className="w-full h-full object-cover"
                 placeholder={true}
