@@ -15,7 +15,7 @@
     "passwordPlaceholder": "أدخل كلمة المرور الخاصة بك",
     "copyright": "جميع الحقوق محفوظة.",
     "logoFallback": "DT",
-    "logoAlt": "شعار قالب لوحة التحكم",
+    "logoAlt": "شعار قالب MINDEVS",
     "processing": "جاري المعالجة..."
   },
   "navigation": {
@@ -636,12 +636,12 @@
     "dataLoaded": "تم تحميل البيانات بنجاح",
     "dataLoadFailed": "فشل تحميل البيانات"
   },
-  "appVersionValue": "قالب MalianDevs الإصدار 1.0.0",
+  "appVersionValue": "قالب MINDEVS الإصدار 1.0.0",
   "header": {
-    "title": "قالب MalianDevs",
+    "title": "قالب MINDEVS",
     "subtitle": "نظام الإدارة",
     "notificationsHeader": "الإشعارات",
-    "logoAlt": "شعار قالب MalianDevs"
+    "logoAlt": "شعار قالب MINDEVS"
   },
   "home": {
     "databaseStatus": "حالة قاعدة البيانات",

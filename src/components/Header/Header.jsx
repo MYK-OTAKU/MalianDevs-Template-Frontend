@@ -51,7 +51,7 @@ const Header = ({ toggleSidebar = () => {}, sidebarExpanded = true, isMobile = f
   };
 
   const renderTitle = () => {
-    const title = getTranslation('header.title', 'MalianDevs Template');
+    const title = getTranslation('header.title', 'MINDEVS Template');
     return title;
   };
 
@@ -94,8 +94,8 @@ const Header = ({ toggleSidebar = () => {}, sidebarExpanded = true, isMobile = f
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center shadow-lg">
             <img 
-              src="/MalianDevs-logo.jpg" 
-              alt={getTranslation('header.logoAlt', "MalianDevs Template Logo")} 
+              src="/logo.png"
+              alt={getTranslation('header.logoAlt', "MINDEVS Template Logo")}
               className="w-8 h-8 object-contain transition-transform duration-200 hover:scale-110"
               onError={(e) => {
                 e.target.style.display = 'none';

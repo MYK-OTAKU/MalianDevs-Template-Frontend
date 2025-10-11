@@ -15,7 +15,7 @@
     "passwordPlaceholder": "Enter your password",
     "copyright": "All rights reserved.",
     "logoFallback": "DT",
-    "logoAlt": "Dashboard Template Logo",
+    "logoAlt": "MINDEVS Template Logo",
     "processing": "Processing..."
   },
   "navigation": {
@@ -638,10 +638,10 @@
   },
   "appVersionValue": "Dashboard Template v1.0.0",
   "header": {
-    "title": "MalianDevs Template",
+    "title": "MINDEVS Template",
     "subtitle": "Management System",
     "notificationsHeader": "Notifications",
-    "logoAlt": "MalianDevs Template Logo"
+    "logoAlt": "MINDEVS Template Logo"
   },
   "home": {
     "databaseStatus": "Database Status",
